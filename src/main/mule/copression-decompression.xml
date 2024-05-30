@@ -1,0 +1,40 @@
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:file="http://www.mulesoft.org/schema/mule/file"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:compression="http://www.mulesoft.org/schema/mule/compression"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+      http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+      http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+      http://www.mulesoft.org/schema/mule/compression http://www.mulesoft.org/schema/mule/compression/current/mule-compression.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="895e92a1-19ef-4b84-84ea-cc58e29e35c9" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="7e5640eb-c701-4ac7-acfe-ad986eed9917" >
+		<file:connection workingDir="C:\Users\manoj\Desktop" />
+	</file:config>
+	<flow name="copression-decompressionFlow" doc:id="01f5ce77-bdc2-4261-8194-ff6470dcd949" >
+		<http:listener doc:name="Listener" doc:id="42624242-5ba0-4f4e-98e3-d9db1e20bd7f" config-ref="HTTP_Listener_config" path="/compressFile"/>
+		<logger level="INFO" doc:name="StartLogger" doc:id="ce40ee74-9ffa-405a-aed9-6ba947dac913" message="going to fetch file and conpress into that"/>
+		<file:read doc:name="Read" doc:id="7d124479-dfb5-4a77-83ee-fa32eecabf93" config-ref="File_Config" path="C:\Users\manoj\Desktop\3rd_Party payload.csv"/>
+		<logger level="INFO" doc:name="readLogger" doc:id="f9d6f6d9-4402-4feb-b860-6034d9b6cdfa" message="#[payload]"/>
+		<compression:compress doc:name="Compress" doc:id="dda0de42-bd9e-44bc-b22b-d2ca955518b9" >
+			<compression:compressor >
+				<compression:gzip-compressor />
+			</compression:compressor>
+		</compression:compress>
+		<file:write doc:name="Write" doc:id="828f2d98-ea31-4d51-a18e-9efc4685ea73" config-ref="File_Config" path="C:\Users\manoj\Desktop\compress.gzip"/>
+		<ee:transform doc:name="Transform Message" doc:id="95109d40-6e7a-4bac-8852-2b076eab0c45" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "Gzip file has been created successfully so please check your local system"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+
+</mule>
